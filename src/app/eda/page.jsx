@@ -11,7 +11,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [processedData, setProcessedData] = useState(null);
-  const [datasetColumns, setDatasetColumns] = useState([]);
+  const [datasetColumns, setDatasetColumns] = useState({});
 
   const fetchReport = async (filename) => {
     setLoading(true);
@@ -21,12 +21,21 @@ export default function Page() {
       setHtml(text);
       setHtmlFile(filename);
       setShowReport(false);
+      setProcessedData(null);
 
-    
-      const colRes = await fetch(`http://localhost:5000/columns`);
-      const colData = await colRes.json();
-      setDatasetColumns(colData.columns);
-      setProcessedData(null); 
+      const colRes = await fetch(`http://localhost:5000/column_metadata`);
+      const metaData = await colRes.json();
+
+      const colMetaObject = {};
+      metaData.forEach((item) => {
+        colMetaObject[item.column] = {
+          nulls: item.nulls,
+          outliers: item.outliers,
+          dtype: item.dtype,
+        };
+      });
+
+      setDatasetColumns(colMetaObject);
     } catch (error) {
       console.error('Error loading report or columns:', error);
     } finally {
@@ -37,7 +46,7 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-10">
-       
+
         <div className="text-center mb-10">
           <h1 className="text-5xl font-bold text-gray-800">ANALYZE YOUR DATASETS</h1>
           <p className="text-lg text-gray-600 mt-4">
@@ -45,12 +54,10 @@ export default function Page() {
           </p>
         </div>
 
-        
         <div className="flex justify-center items-center mb-8">
           <UploadCSV onUploadSuccess={fetchReport} loading={loading} setLoading={setLoading} />
         </div>
 
-        
         {loading && (
           <div className="flex flex-col items-center my-8">
             <svg
@@ -70,36 +77,33 @@ export default function Page() {
           </div>
         )}
 
-        
         {html && !loading && !showReport && (
           <div className="flex flex-col items-center gap-4 mt-8">
             <button
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+              className="mr-10 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
               onClick={() =>
                 window.open(`http://localhost:5000/static/reports/${htmlFile}`, '_blank')
               }
             >
               Open Report in Browser
             </button>
-            <button
-              className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold"
-              onClick={() => setShowReport(true)}
-            >
-              View Report on This Page
-            </button>
           </div>
         )}
 
-        
         {html && showReport && (
           <div className="border-t pt-8 mt-8">
             <EDAReport edaHtml={html} filename={htmlFile} />
           </div>
         )}
 
-        {html && !loading && datasetColumns.length > 0 && (
+        {html && !loading && Object.keys(datasetColumns).length > 0 && (
           <div className="mt-12">
-            <PreprocessForm columns={datasetColumns}/>
+            <PreprocessForm
+              columns={datasetColumns}
+              onProcessed={(updatedColumns) => {
+                setDatasetColumns(updatedColumns);
+              }}
+            />
           </div>
         )}
       </div>
