@@ -199,13 +199,13 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
 
   return (
-    <div className="mt-10 border-t pt-10 pb-10">
+    <div data-aos='fade-right' className="mt-10 border-t pt-10 pb-10">
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
         Preprocess Your Dataset
       </h2>
 
       {highNullColumns.length > 0 && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded mb-6 max-w-3xl mx-auto">
+        <div className="bg-yellow-100 border-4 border-yellow-500 text-yellow-800 p-4 rounded-lg mb-6 max-w-3xl mx-auto">
           <p className="font-semibold mb-2">Suggestion: Remove columns with high missing values</p>
           {highNullColumns.map((col) => (
             <div key={col.name} className="flex justify-between items-center bg-white p-2 border rounded mb-2">
@@ -315,7 +315,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
       </form>
 
       {processedData && Array.isArray(processedData) && processedData.length > 0 && (
-        <div className="mt-10 border-t pt-8 border-b pb-10">
+        <div data-aos='fade-up' className="mt-15 border-t pt-15 border-b pb-20">
           <h3 className="text-2xl font-semibold mb-10 text-center">Processed Dataset Preview</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border rounded">
@@ -341,14 +341,14 @@ export default function PreprocessForm({ onProcessed, columns }) {
       )}
 
       {heatmapUrl && (
-        <div className="mt-10 text-center">
+        <div data-aos='fade-right' className="mt-10 text-center border-b pb-20">
           <h3 className="text-2xl font-bold mb-10">Correlation Heatmap</h3>
           <img src={heatmapUrl} alt="Correlation Heatmap" className="mx-auto rounded shadow-md max-w-full" />
         </div>
       )}
 
       {correlationTable && (
-        <div className="mt-10 overflow-x-auto">
+        <div data-aos='fade-right' className="mt-10 overflow-x-auto border-b pb-20">
           <h3 className="text-2xl font-bold mb-10 mt-5 text-center">Correlation Table</h3>
           <table className="min-w-full bg-white border rounded shadow-md">
             <thead>
@@ -374,7 +374,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
       )}
 
       {correlationTable && (
-        <div className="mt-12">
+        <div data-aos='fade-right' className="mt-12 border-b pb-20">
           <h3 className="text-2xl font-semibold text-center mb-6">Target-Feature Correlation Checker</h3>
           <div className="flex flex-col md:flex-row justify-center items-center gap-4">
             <div>
@@ -410,7 +410,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             </div>
 
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="mt-7 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               onClick={fetchPairCorrelation}
             >
               Check Correlation
@@ -431,8 +431,8 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
 
       {showDownload && selectableColumns.length > 0 && (
-        <div className="mt-10">
-          <h3 className="text-xl font-semibold mb-10 mt-15 text-center">Feature Selection</h3>
+        <div data-aos='fade-right' className="mt-10 ">
+          <h3 className="text-2xl font-bold mb-10 mt-15 text-center">Feature Selection</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto text-center">
             {selectableColumns.map((col) => (
               <label key={col} className="inline-flex items-center justify-center">

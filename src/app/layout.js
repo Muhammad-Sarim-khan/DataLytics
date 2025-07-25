@@ -1,4 +1,5 @@
 import AppShell from './AppShell';
+import AOSInitializer from './components/AOSInitializer';
 
 export const metadata = {
   title: "Create Next App",
@@ -9,6 +10,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <AOSInitializer/>
         <AppShell>
           {children}
         </AppShell>

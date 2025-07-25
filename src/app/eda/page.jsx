@@ -44,8 +44,8 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-10">
+    <div data-aos='fade-right' className="min-h-screen bg-gray-100 py-10 px-4">
+      <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-10  ">
 
         <div className="text-center mb-10">
           <h1 className="text-5xl font-bold text-gray-800">ANALYZE YOUR DATASETS</h1>
