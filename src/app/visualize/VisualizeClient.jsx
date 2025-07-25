@@ -141,7 +141,7 @@ const VisualizeClient = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 py-10 px-4">
+    <div data-aos='fade-up' className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 py-10 px-4">
       <div className="max-w-5xl mx-auto bg-white shadow-xl p-8 rounded-lg">
         <h1 className="text-4xl font-bold text-center text-blue-700 mb-10">
           Processed Dataset Visualization
