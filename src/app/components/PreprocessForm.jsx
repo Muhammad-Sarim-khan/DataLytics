@@ -200,7 +200,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   return (
     <div data-aos='fade-right' className="mt-10 border-t pt-10 pb-10">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+      <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">
         Preprocess Your Dataset
       </h2>
 
@@ -316,7 +316,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
       {processedData && Array.isArray(processedData) && processedData.length > 0 && (
         <div data-aos='fade-up' className="mt-15 border-t pt-15 border-b pb-20">
-          <h3 className="text-2xl font-semibold mb-10 text-center">Processed Dataset Preview</h3>
+          <h3 className="text-3xl font-bold mb-10 text-center text-blue-900">Processed Dataset Preview</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border rounded">
               <thead>
@@ -342,14 +342,14 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
       {heatmapUrl && (
         <div data-aos='fade-right' className="mt-10 text-center border-b pb-20">
-          <h3 className="text-2xl font-bold mb-10">Correlation Heatmap</h3>
+          <h3 className="text-3xl font-bold mb-10 text-blue-900">Correlation Heatmap</h3>
           <img src={heatmapUrl} alt="Correlation Heatmap" className="mx-auto rounded shadow-md max-w-full" />
         </div>
       )}
 
       {correlationTable && (
         <div data-aos='fade-right' className="mt-10 overflow-x-auto border-b pb-20">
-          <h3 className="text-2xl font-bold mb-10 mt-5 text-center">Correlation Table</h3>
+          <h3 className="text-3xl font-bold mb-10 mt-5 text-center text-blue-900">Correlation Table</h3>
           <table className="min-w-full bg-white border rounded shadow-md">
             <thead>
               <tr>
@@ -375,7 +375,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
       {correlationTable && (
         <div data-aos='fade-right' className="mt-12 border-b pb-20">
-          <h3 className="text-2xl font-semibold text-center mb-6">Target-Feature Correlation Checker</h3>
+          <h3 className="text-3xl font-semibold text-center mb-12 text-blue-900">Target-Feature Correlation Checker</h3>
           <div className="flex flex-col md:flex-row justify-center items-center gap-4">
             <div>
               <label className="block mb-1 font-medium">Select Target Variable</label>
@@ -432,7 +432,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
       {showDownload && selectableColumns.length > 0 && (
         <div data-aos='fade-right' className="mt-10 ">
-          <h3 className="text-2xl font-bold mb-10 mt-15 text-center">Feature Selection</h3>
+          <h3 className="text-3xl font-bold mb-14 mt-15 text-center text-blue-900">Feature Selection</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-40 overflow-y-auto text-center">
             {selectableColumns.map((col) => (
               <label key={col} className="inline-flex items-center justify-center">
