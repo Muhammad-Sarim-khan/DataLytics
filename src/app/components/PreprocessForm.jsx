@@ -60,7 +60,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
         body: JSON.stringify({ column: colName }),
       });
       if (!res.ok) throw new Error('Column removal failed.');
-      alert(`Column "${colName}" removed.`);
+      // alert(`Column "${colName}" removed.`);
       // Fetch latest columns from /column_metadata (reflects LAST_UPLOADED_DF)
       const updatedRes = await fetch('http://localhost:5000/column_metadata');
       const updatedData = await updatedRes.json();
@@ -88,8 +88,8 @@ export default function PreprocessForm({ onProcessed, columns }) {
     const formData = new FormData();
     const options = {
       missing: missingOption,
-      // encode: encodeOption,
-      // encode_columns: selectedEncodeCols,
+      encode: encodeOption,
+      encode_columns: selectedEncodeCols,
       scaling: scalingOption,
       scale_columns: selectedScaleCols,
       outlier_columns: selectedOutlierCols,
@@ -129,7 +129,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const toggleSelection = (col, type) => {
     const setter = {
-      // encod: setSelectedEncodeCols,
+      encod: setSelectedEncodeCols,
       scal: setSelectedScaleCols,
       export: setSelectedExportCols,
       outlier: setSelectedOutlierCols,
@@ -240,7 +240,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             </select>
           </div>
 
-          {/* <div>
+          <div>
             <label className="block text-gray-700 font-medium mb-2">Encode Method:</label>
             <select
               value={encodeOption}
@@ -249,7 +249,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             >
               <option value="label">Label Encoding</option>
             </select>
-          </div> */}
+          </div>
 
           <div>
             <label className="block text-gray-700 font-medium mb-2">Feature Scaling:</label>
@@ -267,7 +267,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
         {columns && Object.keys(columns).length > 0 && (
           <>
-            {['scal', 'outlier'].map((type) => (
+            {['encod','scal', 'outlier'].map((type) => (
               <div key={type} className="mt-6">
                 <label className="block text-gray-700 font-medium mb-2 capitalize">
                   Select Columns for {type === 'outlier' ? 'Outlier Handling' : `${type}ing`}:
@@ -282,9 +282,9 @@ export default function PreprocessForm({ onProcessed, columns }) {
                         type="checkbox"
                         className="mt-1"
                         checked={
-                          // type === 'encod'
-                          //   ? selectedEncodeCols.includes(col)
-                          type === 'scal'
+                          type === 'encod'
+                            ? selectedEncodeCols.includes(col)
+                          :type === 'scal'
                             ? selectedScaleCols.includes(col)
                             : selectedOutlierCols.includes(col)
                         }

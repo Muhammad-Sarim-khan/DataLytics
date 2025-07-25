@@ -7,7 +7,7 @@ export default function HeaderCenterText() {
   <span className="text-yellow-100 bg-white/20 px-2 py-1 rounded font-mono">Automating:</span>{' '}
   <span className="font-mono bg-white/20 px-2 py-1 rounded text-green-100 text-2xl">
         <Typewriter
-          words={['Upload', 'Clean', 'Analyze', 'Preprocess']}
+          words={['Analysis','Cleaning', 'Preprocessing']}
           loop={0}
           cursor
           cursorStyle="|"

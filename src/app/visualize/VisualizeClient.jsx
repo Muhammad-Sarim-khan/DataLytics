@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 const Plot = dynamic(() =>
   import('react-plotly.js').then((mod) => {
     const Plot = mod.default;
-    Plot.plotly = require('plotly.js-basic-dist'); // Use lighter Plotly
+    Plot.plotly = require('plotly.js-basic-dist'); 
     return Plot;
   }),
   { ssr: false }
