@@ -24,6 +24,8 @@ export default function PreprocessForm({ onProcessed, columns }) {
   const [featureCol, setFeatureCol] = useState('');
   const [pairCorr, setPairCorr] = useState(null);
   const [pairError, setPairError] = useState('');
+  const [removingColumns, setRemovingColumns] = useState(new Set());
+  const [originalTotalRows, setOriginalTotalRows] = useState(null);
 
   const router = useRouter();
 
@@ -50,21 +52,27 @@ export default function PreprocessForm({ onProcessed, columns }) {
         // Otherwise, use the maximum non-null count or a reasonable default
         let totalRows = null;
         
-        // First, try to find a column that has total_rows specified
-        const columnWithTotalRows = data.find(val => val.total_rows && val.total_rows > 0);
-        if (columnWithTotalRows) {
-          totalRows = columnWithTotalRows.total_rows;
+        console.log('Raw data from API:', data); // Debug log
+        
+        // Use original total rows if available, otherwise calculate it
+        if (originalTotalRows !== null) {
+          totalRows = originalTotalRows;
+          console.log('Using stored originalTotalRows:', totalRows);
         } else {
-          // If no total_rows provided, estimate from the data
-          const maxNulls = Math.max(...data.map(val => val.nulls || 0));
-          
-          // If the maximum nulls is significant, it's likely the total rows
-          // Otherwise, use a reasonable default
-          if (maxNulls > 0) {
-            totalRows = maxNulls;
+          // First, try to find a column that has total_rows specified
+          const columnWithTotalRows = data.find(val => val.total_rows && val.total_rows > 0);
+          if (columnWithTotalRows) {
+            totalRows = columnWithTotalRows.total_rows;
+            console.log('Using total_rows from API:', totalRows);
           } else {
-            totalRows = 100; // fallback
+            // If no total_rows provided, use the maximum null count as total rows
+            const maxNulls = Math.max(...data.map(val => val.nulls || 0));
+            totalRows = maxNulls > 0 ? maxNulls : 100;
+            console.log('Calculated totalRows from maxNulls:', totalRows);
           }
+          
+          // Store the original total rows for future use
+          setOriginalTotalRows(totalRows);
         }
         
         const highNulls = data
@@ -76,15 +84,23 @@ export default function PreprocessForm({ onProcessed, columns }) {
             const total = val.total_rows || totalRows;
             const nullRatio = val.nulls / total;
             
+            console.log(`Column ${val.column}: ${val.nulls} nulls, total=${total}, ratio=${(nullRatio * 100).toFixed(1)}%`);
+            
             // Show columns that are either above threshold OR completely empty (100% nulls)
-            return nullRatio > NULL_THRESHOLD || (val.nulls > 0 && val.nulls === total);
+            const shouldShow = nullRatio > NULL_THRESHOLD || (val.nulls > 0 && val.nulls === total);
+            console.log(`Should show ${val.column}:`, shouldShow);
+            
+            return shouldShow;
           })
           .map((val) => {
             const total = val.total_rows || totalRows;
+            const percentage = ((val.nulls / total) * 100);
+            console.log(`Final calculation for ${val.column}: ${val.nulls}/${total} = ${percentage}%`);
+            
             return {
               name: val.column,
               nulls: val.nulls,
-              nullPercentage: ((val.nulls / total) * 100),
+              nullPercentage: percentage,
             };
           });
         
@@ -98,30 +114,40 @@ export default function PreprocessForm({ onProcessed, columns }) {
   }, [columns]);
 
   const handleRemoveColumn = async (colName) => {
+    // Set loading state for this specific column
+    setRemovingColumns(prev => new Set(prev).add(colName));
+    
     try {
       const res = await fetch('https://datalytics-backend-production.up.railway.app/remove_column', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ column: colName }),
       });
+      
       if (!res.ok) throw new Error('Column removal failed.');
-      // alert(`Column "${colName}" removed.`);
-      // Fetch latest columns from /column_metadata (reflects LAST_UPLOADED_DF)
-      const updatedRes = await fetch('https://datalytics-backend-production.up.railway.app/column_metadata');
-      const updatedData = await updatedRes.json();
-      // Converting array to object for parent columns state
-      const updatedColumns = {};
-      updatedData.forEach((item) => {
-        updatedColumns[item.column] = {
-          nulls: item.nulls,
-          outliers: item.outliers,
-          dtype: item.dtype,
-        };
-      });
-      onProcessed && onProcessed(updatedColumns);
+      
+      // Optimistically remove the column from the UI immediately
+      setHighNullColumns(prev => prev.filter(col => col.name !== colName));
+      
+      // Update parent columns state by removing the column
+      if (onProcessed && columns) {
+        const updatedColumns = { ...columns };
+        delete updatedColumns[colName];
+        onProcessed(updatedColumns);
+      }
+      
     } catch (err) {
       console.error('Error:', err);
       alert('Failed to remove column.');
+      // Revert the optimistic update on error
+      // The useEffect will refetch the data anyway
+    } finally {
+      // Clear loading state for this column
+      setRemovingColumns(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(colName);
+        return newSet;
+      });
     }
   };
 
@@ -255,13 +281,18 @@ export default function PreprocessForm({ onProcessed, columns }) {
           {highNullColumns.map((col) => (
             <div key={col.name} className="flex justify-between items-center bg-white p-2 border rounded mb-2">
               <span className="text-sm">
-                {col.name} ({col.nullPercentage}% Null Values)
+                {col.name} ({col.nullPercentage.toFixed(1)}% Null Values )
               </span>
               <button
                 onClick={() => handleRemoveColumn(col.name)}
-                className="bg-red-600 text-white text-sm px-3 py-1 rounded hover:bg-red-700"
+                disabled={removingColumns.has(col.name)}
+                className={`text-white text-sm px-3 py-1 rounded cursor-pointer ${
+                  removingColumns.has(col.name) 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
               >
-                Remove Column
+                {removingColumns.has(col.name) ? 'Removing...' : 'Remove Column'}
               </button>
             </div>
           ))}
@@ -350,7 +381,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
         <div className="flex justify-center mt-6">
           <button
             type="submit"
-            className={`px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition ${loading ? 'opacity-50 cursor-not-allowed' : ''
+            className={`px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer ${loading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             disabled={loading}
           >
@@ -455,7 +486,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             </div>
 
             <button
-              className="mt-7 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="mt-7 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
               onClick={fetchPairCorrelation}
             >
               Check Correlation
@@ -495,7 +526,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             <button
               onClick={handleDownload}
               disabled={selectedExportCols.length === 0}
-              className={`px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition ${selectedExportCols.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+              className={`px-6 py-2 bg-green-600 text-white font-semibold cursor-pointer rounded-lg hover:bg-green-700 transition ${selectedExportCols.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
             >
               Download Preprocessed Dataset

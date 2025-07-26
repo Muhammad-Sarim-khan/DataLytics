@@ -184,7 +184,7 @@ export default function Page() {
         {html && !loading && !showReport && (
           <div className="flex flex-col items-center gap-4 mt-8">
             <button
-              className="mr-10 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+              className="mr-10 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold cursor-pointer"
               onClick={() =>
                 window.open(`https://datalytics-backend-production.up.railway.app/static/reports/${htmlFile}`, '_blank')
               }

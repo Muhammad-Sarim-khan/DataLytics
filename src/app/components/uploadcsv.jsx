@@ -56,12 +56,13 @@ export default function UploadCSV({ onUploadSuccess, loading, setLoading }) {
         file:rounded-full file:border-0
         file:text-sm file:font-semibold
         file:bg-blue-50 file:text-blue-700
+        file:cursor-pointer
         hover:file:bg-blue-100"
       />
       <button
         type="submit"
         disabled={loading}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 mr-10 mt-5"
+        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 mr-10 mt-5 cursor-pointer"
       >
         {loading ? 'Generating Report....' : 'Upload and Generate Report'}
       </button>
