@@ -38,7 +38,7 @@ export default function EDAReport({ edaHtml, filename }) {
 
         {filename && (
           <a
-            href={`http://localhost:5000/static/reports/${filename}`}
+            href={`https://datalytics-backend-production.up.railway.app/static/reports/${filename}`}
             target="_blank"
             rel="noopener noreferrer"
           >
