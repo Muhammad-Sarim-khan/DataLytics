@@ -186,7 +186,7 @@ export default function Page() {
             <button
               className="mr-10 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
               onClick={() =>
-                window.open(`http://localhost:5000/static/reports/${htmlFile}`, '_blank')
+                window.open(`https://datalytics-backend-production.up.railway.app/static/reports/${htmlFile}`, '_blank')
               }
             >
               Open Report in Browser
