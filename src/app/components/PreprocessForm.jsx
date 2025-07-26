@@ -31,7 +31,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     const fetchColumns = async () => {
       try {
         // Use /column_metadata for highNullColumns (reflects LAST_UPLOADED_DF)
-        const res = await fetch('datalytics-backend-production.up.railway.app/column_metadata');
+        const res = await fetch('https://datalytics-backend-production.up.railway.app/column_metadata');
         const data = await res.json();
         // data is an array of { column, nulls, outliers, dtype }
         const highNulls = data
@@ -54,7 +54,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const handleRemoveColumn = async (colName) => {
     try {
-      const res = await fetch('datalytics-backend-production.up.railway.app/remove_column', {
+      const res = await fetch('https://datalytics-backend-production.up.railway.app/remove_column', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ column: colName }),
@@ -62,7 +62,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
       if (!res.ok) throw new Error('Column removal failed.');
       // alert(`Column "${colName}" removed.`);
       // Fetch latest columns from /column_metadata (reflects LAST_UPLOADED_DF)
-      const updatedRes = await fetch('datalytics-backend-production.up.railway.app/column_metadata');
+      const updatedRes = await fetch('https://datalytics-backend-production.up.railway.app/column_metadata');
       const updatedData = await updatedRes.json();
       // Converting array to object for parent columns state
       const updatedColumns = {};
@@ -97,7 +97,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     formData.append('options', JSON.stringify(options));
 
     try {
-      const result = await fetch('datalytics-backend-production.up.railway.app/preprocess', {
+      const result = await fetch('https://datalytics-backend-production.up.railway.app/preprocess', {
         method: 'POST',
         body: formData,
       });
@@ -107,12 +107,12 @@ export default function PreprocessForm({ onProcessed, columns }) {
       const processed = await result.json();
       setProcessedData(processed);
 
-      const corrRes = await fetch('datalytics-backend-production.up.railway.app/correlation');
+      const corrRes = await fetch('https://datalytics-backend-production.up.railway.app/correlation');
       if (!corrRes.ok) throw new Error('Failed to fetch correlation.');
 
       const corrData = await corrRes.json();
       setCorrelationTable(corrData.correlation_table);
-      setHeatmapUrl(`datalytics-backend-production.up.railway.app${corrData.heatmap_path}`);
+      setHeatmapUrl(`https://datalytics-backend-production.up.railway.app${corrData.heatmap_path}`);
 
       setSelectableColumns(corrData.selectable_columns || []);
       ;
@@ -140,7 +140,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const handleDownload = async () => {
     try {
-      const res = await fetch('datalytics-backend-production.up.railway.app/download', {
+      const res = await fetch('https://datalytics-backend-production.up.railway.app/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selected_columns: selectedExportCols }),
@@ -177,7 +177,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     }
 
     try {
-      const res = await fetch('datalytics-backend-production.up.railway.app/correlation_pair', {
+      const res = await fetch('https://datalytics-backend-production.up.railway.app/correlation_pair', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target: targetCol, feature: featureCol }),

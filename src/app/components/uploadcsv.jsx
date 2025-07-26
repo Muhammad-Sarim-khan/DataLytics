@@ -23,7 +23,7 @@ export default function UploadCSV({ onUploadSuccess, loading, setLoading }) {
     formData.append('dataset', file);
 
     try {
-      const res = await fetch('datalytics-backend-production.up.railway.app/upload', {
+      const res = await fetch('https://datalytics-backend-production.up.railway.app/upload', {
         method: 'POST',
         body: formData,
       });
