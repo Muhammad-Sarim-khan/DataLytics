@@ -32,21 +32,66 @@ export default function PreprocessForm({ onProcessed, columns }) {
       try {
         // Use /column_metadata for highNullColumns (reflects LAST_UPLOADED_DF)
         const res = await fetch('https://datalytics-backend-production.up.railway.app/column_metadata');
+        
+        if (!res.ok) {
+          return;
+        }
+        
         const data = await res.json();
         // data is an array of { column, nulls, outliers, dtype }
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          setHighNullColumns([]);
+          return;
+        }
+        
+        // Calculate total rows more accurately
+        // If total_rows is provided in any column, use that
+        // Otherwise, use the maximum non-null count or a reasonable default
+        let totalRows = null;
+        
+        // First, try to find a column that has total_rows specified
+        const columnWithTotalRows = data.find(val => val.total_rows && val.total_rows > 0);
+        if (columnWithTotalRows) {
+          totalRows = columnWithTotalRows.total_rows;
+        } else {
+          // If no total_rows provided, estimate from the data
+          const maxNulls = Math.max(...data.map(val => val.nulls || 0));
+          
+          // If the maximum nulls is significant, it's likely the total rows
+          // Otherwise, use a reasonable default
+          if (maxNulls > 0) {
+            totalRows = maxNulls;
+          } else {
+            totalRows = 100; // fallback
+          }
+        }
+        
         const highNulls = data
-          .filter((val) => (val.nulls / (val.total_rows ?? 1000)) > NULL_THRESHOLD)
+          .filter((val) => {
+            if (!val || typeof val !== 'object') {
+              return false;
+            }
+            
+            const total = val.total_rows || totalRows;
+            const nullRatio = val.nulls / total;
+            
+            // Show columns that are either above threshold OR completely empty (100% nulls)
+            return nullRatio > NULL_THRESHOLD || (val.nulls > 0 && val.nulls === total);
+          })
           .map((val) => {
-            const total = val.total_rows ?? 1000;
+            const total = val.total_rows || totalRows;
             return {
               name: val.column,
               nulls: val.nulls,
-              nullPercentage: ((val.nulls / total) * 100).toFixed(1),
+              nullPercentage: ((val.nulls / total) * 100),
             };
           });
+        
         setHighNullColumns(highNulls);
       } catch (err) {
         console.error('Error fetching column metadata:', err);
+        setHighNullColumns([]);
       }
     };
     fetchColumns();
@@ -210,7 +255,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
           {highNullColumns.map((col) => (
             <div key={col.name} className="flex justify-between items-center bg-white p-2 border rounded mb-2">
               <span className="text-sm">
-                {col.name} ({col.nullPercentage}% missing)
+                {col.name} ({col.nullPercentage}% Null Values)
               </span>
               <button
                 onClick={() => handleRemoveColumn(col.name)}
