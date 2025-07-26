@@ -120,14 +120,14 @@ export default function Page() {
   const fetchReport = async (filename) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/static/reports/${filename}`);
+      const res = await fetch(`datalytics-backend-production.up.railway.app/static/reports/${filename}`);
       const text = await res.text();
       setHtml(text);
       setHtmlFile(filename);
       setShowReport(false);
       setProcessedData(null);
 
-      const colRes = await fetch(`http://localhost:5000/column_metadata`);
+      const colRes = await fetch(`datalytics-backend-production.up.railway.app/column_metadata`);
       const metaData = await colRes.json();
 
       const colMetaObject = {};

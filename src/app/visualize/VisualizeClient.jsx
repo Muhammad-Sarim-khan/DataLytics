@@ -28,7 +28,7 @@ const VisualizeClient = () => {
     try {
       const params = new URLSearchParams();
       featuresToFetch.forEach((f) => params.append('features', f));
-      const res = await fetch(`http://localhost:5000/final_dataset?${params.toString()}`);
+      const res = await fetch(`datalytics-backend-production.up.railway.app/final_dataset?${params.toString()}`);
       const json = await res.json();
       setData(json);
       return json;

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function PreprocessForm({ onProcessed, columns }) {
   // Setting the threshold for null values (0.0 means show columns having 0 nulls)
-  const NULL_THRESHOLD = 0.0; 
+  const NULL_THRESHOLD = 0.5; 
   const [missingOption, setMissingOption] = useState('mean');
   const [encodeOption, setEncodeOption] = useState('label');
   const [scalingOption, setScalingOption] = useState('none');
@@ -31,11 +31,11 @@ export default function PreprocessForm({ onProcessed, columns }) {
     const fetchColumns = async () => {
       try {
         // Use /column_metadata for highNullColumns (reflects LAST_UPLOADED_DF)
-        const res = await fetch('http://localhost:5000/column_metadata');
+        const res = await fetch('datalytics-backend-production.up.railway.app/column_metadata');
         const data = await res.json();
         // data is an array of { column, nulls, outliers, dtype }
         const highNulls = data
-          .filter((val) => (val.nulls / (val.total_rows ?? 1)) >= NULL_THRESHOLD)
+          .filter((val) => (val.nulls / (val.total_rows ?? 1000)) > NULL_THRESHOLD)
           .map((val) => {
             const total = val.total_rows ?? 1000;
             return {
@@ -54,7 +54,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const handleRemoveColumn = async (colName) => {
     try {
-      const res = await fetch('http://localhost:5000/remove_column', {
+      const res = await fetch('datalytics-backend-production.up.railway.app/remove_column', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ column: colName }),
@@ -62,7 +62,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
       if (!res.ok) throw new Error('Column removal failed.');
       // alert(`Column "${colName}" removed.`);
       // Fetch latest columns from /column_metadata (reflects LAST_UPLOADED_DF)
-      const updatedRes = await fetch('http://localhost:5000/column_metadata');
+      const updatedRes = await fetch('datalytics-backend-production.up.railway.app/column_metadata');
       const updatedData = await updatedRes.json();
       // Converting array to object for parent columns state
       const updatedColumns = {};
@@ -97,7 +97,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     formData.append('options', JSON.stringify(options));
 
     try {
-      const result = await fetch('http://localhost:5000/preprocess', {
+      const result = await fetch('datalytics-backend-production.up.railway.app/preprocess', {
         method: 'POST',
         body: formData,
       });
@@ -107,12 +107,12 @@ export default function PreprocessForm({ onProcessed, columns }) {
       const processed = await result.json();
       setProcessedData(processed);
 
-      const corrRes = await fetch('http://localhost:5000/correlation');
+      const corrRes = await fetch('datalytics-backend-production.up.railway.app/correlation');
       if (!corrRes.ok) throw new Error('Failed to fetch correlation.');
 
       const corrData = await corrRes.json();
       setCorrelationTable(corrData.correlation_table);
-      setHeatmapUrl(`http://localhost:5000${corrData.heatmap_path}`);
+      setHeatmapUrl(`datalytics-backend-production.up.railway.app${corrData.heatmap_path}`);
 
       setSelectableColumns(corrData.selectable_columns || []);
       ;
@@ -140,7 +140,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const handleDownload = async () => {
     try {
-      const res = await fetch('http://localhost:5000/download', {
+      const res = await fetch('datalytics-backend-production.up.railway.app/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selected_columns: selectedExportCols }),
@@ -177,7 +177,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/correlation_pair', {
+      const res = await fetch('datalytics-backend-production.up.railway.app/correlation_pair', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target: targetCol, feature: featureCol }),
@@ -458,7 +458,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
           </div>
         </div>
       )}
-      {showDownload && (
+      {/* {showDownload && (
         <div className="flex justify-center mt-6">
           <button
             onClick={() =>
@@ -471,7 +471,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             Go to Visualizations
           </button>
         </div>
-      )}
+      )} */}
 
     </div>
   );
