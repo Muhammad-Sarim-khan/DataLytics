@@ -46,32 +46,27 @@ export default function PreprocessForm({ onProcessed, columns }) {
           setHighNullColumns([]);
           return;
         }
-        
-        // Calculate total rows more accurately
-        // If total_rows is provided in any column, use that
-        // Otherwise, use the maximum non-null count or a reasonable default
         let totalRows = null;
         
-        console.log('Raw data from API:', data); // Debug log
+        console.log('Raw data from API:', data); 
         
-        // Use original total rows if available, otherwise calculate it
+        
         if (originalTotalRows !== null) {
           totalRows = originalTotalRows;
           console.log('Using stored originalTotalRows:', totalRows);
         } else {
-          // First, try to find a column that has total_rows specified
+          
           const columnWithTotalRows = data.find(val => val.total_rows && val.total_rows > 0);
           if (columnWithTotalRows) {
             totalRows = columnWithTotalRows.total_rows;
             console.log('Using total_rows from API:', totalRows);
           } else {
-            // If no total_rows provided, use the maximum null count as total rows
+            
             const maxNulls = Math.max(...data.map(val => val.nulls || 0));
             totalRows = maxNulls > 0 ? maxNulls : 100;
             console.log('Calculated totalRows from maxNulls:', totalRows);
           }
           
-          // Store the original total rows for future use
           setOriginalTotalRows(totalRows);
         }
         
@@ -86,7 +81,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             
             console.log(`Column ${val.column}: ${val.nulls} nulls, total=${total}, ratio=${(nullRatio * 100).toFixed(1)}%`);
             
-            // Show columns that are either above threshold OR completely empty (100% nulls)
+           
             const shouldShow = nullRatio > NULL_THRESHOLD || (val.nulls > 0 && val.nulls === total);
             console.log(`Should show ${val.column}:`, shouldShow);
             
@@ -114,7 +109,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
   }, [columns]);
 
   const handleRemoveColumn = async (colName) => {
-    // Set loading state for this specific column
+    
     setRemovingColumns(prev => new Set(prev).add(colName));
     
     try {
@@ -126,10 +121,10 @@ export default function PreprocessForm({ onProcessed, columns }) {
       
       if (!res.ok) throw new Error('Column removal failed.');
       
-      // Optimistically remove the column from the UI immediately
+      
       setHighNullColumns(prev => prev.filter(col => col.name !== colName));
       
-      // Update parent columns state by removing the column
+      
       if (onProcessed && columns) {
         const updatedColumns = { ...columns };
         delete updatedColumns[colName];
@@ -139,10 +134,10 @@ export default function PreprocessForm({ onProcessed, columns }) {
     } catch (err) {
       console.error('Error:', err);
       alert('Failed to remove column.');
-      // Revert the optimistic update on error
-      // The useEffect will refetch the data anyway
+      
+      
     } finally {
-      // Clear loading state for this column
+      
       setRemovingColumns(prev => {
         const newSet = new Set(prev);
         newSet.delete(colName);
