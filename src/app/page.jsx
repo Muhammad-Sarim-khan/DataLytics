@@ -16,14 +16,14 @@ export default function Page() {
   const fetchReport = async (filename) => {
     setLoading(true);
     try {
-      const res = await fetch(`https://datalytics-backend-production.up.railway.app/static/reports/${filename}`);
+      const res = await fetch(`http://127.0.0.1:5000/static/reports/${filename}`);
       const text = await res.text();
       setHtml(text);
       setHtmlFile(filename);
       setShowReport(false);
       setProcessedData(null);
 
-      const colRes = await fetch(`https://datalytics-backend-production.up.railway.app/column_metadata`);
+      const colRes = await fetch(`http://127.0.0.1:5000/column_metadata`);
       const metaData = await colRes.json();
 
       const colMetaObject = {};
@@ -82,7 +82,7 @@ export default function Page() {
             <button
               className="mr-10 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold cursor-pointer"
               onClick={() =>
-                window.open(`https://datalytics-backend-production.up.railway.app/static/reports/${htmlFile}`, '_blank')
+                window.open(`http://127.0.0.1:5000/static/reports/${htmlFile}`, '_blank')
               }
             >
               Open Report in Browser

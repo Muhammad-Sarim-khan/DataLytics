@@ -33,7 +33,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     const fetchColumns = async () => {
       try {
         // Use /column_metadata for highNullColumns (reflects LAST_UPLOADED_DF)
-        const res = await fetch('https://datalytics-backend-production.up.railway.app/column_metadata');
+        const res = await fetch('http://127.0.0.1:5000/column_metadata');
         
         if (!res.ok) {
           return;
@@ -113,7 +113,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     setRemovingColumns(prev => new Set(prev).add(colName));
     
     try {
-      const res = await fetch('https://datalytics-backend-production.up.railway.app/remove_column', {
+      const res = await fetch('http://127.0.0.1:5000/remove_column', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ column: colName }),
@@ -154,8 +154,8 @@ export default function PreprocessForm({ onProcessed, columns }) {
     const formData = new FormData();
     const options = {
       missing: missingOption,
-      encode: encodeOption,
-      encode_columns: selectedEncodeCols,
+      // encode: encodeOption,
+      // encode_columns: selectedEncodeCols,
       scaling: scalingOption,
       scale_columns: selectedScaleCols,
       outlier_columns: selectedOutlierCols,
@@ -163,7 +163,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     formData.append('options', JSON.stringify(options));
 
     try {
-      const result = await fetch('https://datalytics-backend-production.up.railway.app/preprocess', {
+      const result = await fetch('http://127.0.0.1:5000/preprocess', {
         method: 'POST',
         body: formData,
       });
@@ -173,12 +173,12 @@ export default function PreprocessForm({ onProcessed, columns }) {
       const processed = await result.json();
       setProcessedData(processed);
 
-      const corrRes = await fetch('https://datalytics-backend-production.up.railway.app/correlation');
+      const corrRes = await fetch('http://127.0.0.1:5000/correlation');
       if (!corrRes.ok) throw new Error('Failed to fetch correlation.');
 
       const corrData = await corrRes.json();
       setCorrelationTable(corrData.correlation_table);
-      setHeatmapUrl(`https://datalytics-backend-production.up.railway.app${corrData.heatmap_path}`);
+      setHeatmapUrl(`http://127.0.0.1:5000${corrData.heatmap_path}`);
 
       setSelectableColumns(corrData.selectable_columns || []);
       ;
@@ -195,7 +195,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const toggleSelection = (col, type) => {
     const setter = {
-      encod: setSelectedEncodeCols,
+      // encod: setSelectedEncodeCols,
       scal: setSelectedScaleCols,
       export: setSelectedExportCols,
       outlier: setSelectedOutlierCols,
@@ -206,7 +206,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
   const handleDownload = async () => {
     try {
-      const res = await fetch('https://datalytics-backend-production.up.railway.app/download', {
+      const res = await fetch('http://127.0.0.1:5000/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selected_columns: selectedExportCols }),
@@ -243,7 +243,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
     }
 
     try {
-      const res = await fetch('https://datalytics-backend-production.up.railway.app/correlation_pair', {
+      const res = await fetch('http://127.0.0.1:5000/correlation_pair', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target: targetCol, feature: featureCol }),
@@ -311,7 +311,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             </select>
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-gray-700 font-medium mb-2">Encode Method:</label>
             <select
               value={encodeOption}
@@ -320,7 +320,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             >
               <option value="label">Label Encoding</option>
             </select>
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-gray-700 font-medium mb-2">Feature Scaling:</label>
@@ -338,7 +338,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
 
         {columns && Object.keys(columns).length > 0 && (
           <>
-            {['encod','scal', 'outlier'].map((type) => (
+            {['scal', 'outlier'].map((type) => (
               <div key={type} className="mt-6">
                 <label className="block text-gray-700 font-medium mb-2 capitalize">
                   Select Columns for {type === 'outlier' ? 'Outlier Handling' : `${type}ing`}:
@@ -353,9 +353,9 @@ export default function PreprocessForm({ onProcessed, columns }) {
                         type="checkbox"
                         className="mt-1"
                         checked={
-                          type === 'encod'
-                            ? selectedEncodeCols.includes(col)
-                          :type === 'scal'
+                          // type === 'encod'
+                          //   ? selectedEncodeCols.includes(col)
+                          type === 'scal'
                             ? selectedScaleCols.includes(col)
                             : selectedOutlierCols.includes(col)
                         }
@@ -529,7 +529,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
           </div>
         </div>
       )}
-      {/* {showDownload && (
+      {showDownload && (
         <div className="flex justify-center mt-6">
           <button
             onClick={() =>
@@ -542,7 +542,7 @@ export default function PreprocessForm({ onProcessed, columns }) {
             Go to Visualizations
           </button>
         </div>
-      )} */}
+      )}
 
     </div>
   );
